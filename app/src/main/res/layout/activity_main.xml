@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/backgroundColor"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".MainActivity">
+
+    <ImageView
+        android:id="@+id/cancelIcon"
+        android:layout_width="22dp"
+        android:layout_height="22dp"
+        android:layout_marginStart="25dp"
+        android:layout_marginTop="30dp"
+        android:src="@drawable/cancel_icon" />
+
+    <ImageView
+        android:id="@+id/downloadIcon"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_marginStart="300dp"
+        android:layout_marginTop="24dp"
+        android:src="@drawable/download_icon" />
+
+    <ImageView
+        android:id="@+id/originalImage"
+        android:layout_width="400dp"
+        android:layout_height="411dp"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_alignParentEnd="true"
+        android:layout_marginStart="0dp"
+        android:layout_marginTop="66dp"
+        android:layout_marginEnd="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/no_image_pic" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/categoryCollectionRecyle"
+        android:layout_width="match_parent"
+        android:layout_height="69dp"
+        android:layout_below="@id/originalImage"
+        android:layout_marginTop="0dp"
+        android:layout_marginBottom="10dp"
+        android:background="@color/backgroundColor"
+        android:scrollbars="horizontal" />
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/filterCollectionRecyle"
+        android:layout_below="@+id/categoryCollectionRecyle"
+        android:layout_width="match_parent"
+        android:layout_height="190dp"
+        android:orientation="horizontal"
+        android:scrollbars="horizontal" />
+
+
+</RelativeLayout>

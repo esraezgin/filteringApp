@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.cardview.widget.CardView
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="100dp"
+    android:layout_marginEnd="10dp"
+    android:layout_height="125dp">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" >
+
+    <ImageView
+        android:id="@+id/filteredImageTV"
+        android:layout_width="wrap_content"
+        android:layout_height="100dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/image_2" />
+
+    <TextView
+        android:id="@+id/filteredTextTV"
+        android:layout_width="match_parent"
+        android:layout_below="@+id/filteredImageTV"
+        android:layout_height="match_parent"
+        android:gravity="center"
+        android:paddingLeft="10dp"
+        android:background="#8F512866"
+        android:text="Mono_01   "
+        android:textColor="#CFC9C9"
+        android:textSize="18sp" />
+
+    </RelativeLayout>
+
+
+</androidx.cardview.widget.CardView>
