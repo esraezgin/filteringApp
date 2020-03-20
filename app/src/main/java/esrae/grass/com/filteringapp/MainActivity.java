@@ -220,6 +220,7 @@ public class MainActivity extends AppCompatActivity implements CategoryAdapter.O
         switch (categoriesPassData)
         {
             case "Color" :
+                filteredBitmap.clear();
                 filteredBitmap.add(new
                     FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(this.getResources(), R.drawable.mono_1)),
                     "Mono_1"));
@@ -250,17 +251,9 @@ public class MainActivity extends AppCompatActivity implements CategoryAdapter.O
                 filteredBitmap.add(new
                         FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(this.getResources(), R.drawable.mono_gr_3)),
                         "MGreen_3"));
-
-                filterCollectionRecyle.setHasFixedSize(true);
-                LinearLayoutManager layoutManager
-                        = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-                filterCollectionRecyle.setLayoutManager(layoutManager);
-                filterAdapter=new FilterCollectionAdapter(filteredBitmap);
-                filterCollectionRecyle.setAdapter(filterAdapter);
                 applyFilterOriginalImage();
                 break;
             case "Random" :
-                filteredBitmap.clear();
                 filteredBitmap.add(new
                         FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(this.getResources(), R.drawable.filmic_1)),
                         "Filmic_1"));
@@ -291,19 +284,11 @@ public class MainActivity extends AppCompatActivity implements CategoryAdapter.O
                 filteredBitmap.add(new
                         FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(this.getResources(), R.drawable.filmic_10)),
                         "Filmic_10"));
-                filterCollectionRecyle.setHasFixedSize(true);
-                LinearLayoutManager layoutManager1
-                        = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-                filterCollectionRecyle.setLayoutManager(layoutManager1);
-                filterAdapter=new FilterCollectionAdapter(filteredBitmap);
-                filterCollectionRecyle.setAdapter(filterAdapter);
+
                 applyFilterOriginalImage();
                 break;
             case "Type" :
                 filteredBitmap.clear();
-                filteredBitmap.add(new
-                        FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(this.getResources(), R.drawable.simple_1)),
-                        "Simple_1"));
                 filteredBitmap.add(new
                         FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(this.getResources(), R.drawable.simple_2)),
                         "Simple_2"));
@@ -338,20 +323,19 @@ public class MainActivity extends AppCompatActivity implements CategoryAdapter.O
                         FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(this.getResources(), R.drawable.web_03)),
                         "Web_3"));
 
-                filterCollectionRecyle.setHasFixedSize(true);
-                LinearLayoutManager layoutManager2
-                        = new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false);
-                filterCollectionRecyle.setLayoutManager(layoutManager2);
-                filterAdapter=new FilterCollectionAdapter(filteredBitmap);
-                filterCollectionRecyle.setAdapter(filterAdapter);
                 applyFilterOriginalImage();
                 break;
-
-
+                default:
+                    break;
         }
     }
-
     private void applyFilterOriginalImage() {
+        filterCollectionRecyle.setHasFixedSize(true);
+        filterCollectionRecyle.setItemViewCacheSize (15);
+        filterCollectionRecyle.setLayoutManager(new LinearLayoutManager(this, LinearLayoutManager.HORIZONTAL, false));
+        filterAdapter=new FilterCollectionAdapter(filteredBitmap);
+        filterAdapter.setHasStableIds(true);
+        filterCollectionRecyle.setAdapter(filterAdapter);
         filterAdapter.setOnItemClickListener(new FilterCollectionAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(int position) {
