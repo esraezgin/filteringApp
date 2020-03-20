@@ -26,7 +26,6 @@ import android.widget.Toast;
 import java.io.IOException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.List;
 
 import Adapter.CategoryAdapter;
 import Adapter.FilterCollectionAdapter;
@@ -39,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements CategoryAdapter.O
     private static final int IMAGE_PICK_CODE = 1000;
     private static final int PERMISSION_CODE = 1001;
     RecyclerView filterCollectionRecyle,categoryCollectionRecyle;
-    Bitmap originalBitmap;
+    public Bitmap resizedOriginalImage;
     ProgressBar progressBar;
     public String categoriesPassData;
     int save_pos;
@@ -47,9 +46,9 @@ public class MainActivity extends AppCompatActivity implements CategoryAdapter.O
     public static int change_pos;
     public ArrayList<Category> categoryArrayList=new ArrayList<>();
     public FilterCollectionAdapter filterAdapter;
-    ArrayList<FilterModel> colorfilter =new ArrayList<>();
-    ArrayList<FilterModel> random_filterList=new ArrayList<>();
-    ArrayList<FilterModel> type_filterList=new ArrayList<>();
+    public ArrayList<FilterModel> colorfilter =new ArrayList<>();
+    public ArrayList<FilterModel> random_filterList=new ArrayList<>();
+    public ArrayList<FilterModel> type_filterList=new ArrayList<>();
 
 
     @Override
@@ -65,7 +64,7 @@ public class MainActivity extends AppCompatActivity implements CategoryAdapter.O
                 {
                     if(checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) ==
                             PackageManager.PERMISSION_DENIED){
-                       requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},PERMISSION_CODE);
+                        requestPermissions(new String[]{Manifest.permission.READ_EXTERNAL_STORAGE},PERMISSION_CODE);
                     }
                     else
                     {
@@ -185,63 +184,49 @@ public class MainActivity extends AppCompatActivity implements CategoryAdapter.O
 
     }
 
-    public void getAsyncTaskResult(ArrayList<FilterModel>[] filter)
-    {
-        colorfilter=filter[0];
-        random_filterList=filter[1];
-        type_filterList=filter[2];
-    }
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-       switch (requestCode)
-       {
-           case PERMISSION_CODE :
-               if(grantResults.length > 0 && grantResults[0]==PackageManager.PERMISSION_GRANTED)
-               {
-                   pickImageFromGalery();
-               }
-               else
-               {
-                   Toast.makeText(this, "Permission Denied..!", Toast.LENGTH_SHORT).show();
-               }
-               break;
-       }
+        switch (requestCode)
+        {
+            case PERMISSION_CODE :
+                if(grantResults.length > 0 && grantResults[0]==PackageManager.PERMISSION_GRANTED)
+                {
+                    pickImageFromGalery();
+                }
+                else
+                {
+                    Toast.makeText(this, "Permission Denied..!", Toast.LENGTH_SHORT).show();
+                }
+                break;
+        }
     }
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data){
         super.onActivityResult(requestCode, resultCode, data);
+        Bitmap originalBitmap;
         if (requestCode == IMAGE_PICK_CODE) {
             Uri uri = data.getData();
             originalImage.setImageURI(uri);
             originalImage.setClickable(false);
             try {
                 originalBitmap= MediaStore.Images.Media.getBitmap(getApplicationContext().getContentResolver(), uri);
+                resizedOriginalImage = Bitmap.
+               createScaledBitmap(originalBitmap,(int)(originalBitmap.getWidth()*0.2), (int)(originalBitmap.getHeight()*0.2), true);
                 LUTApplyTask lutApplyTask=new LUTApplyTask(this);
-
-                lutApplyTask.execute(originalBitmap);
+                lutApplyTask.execute();
                 Toast.makeText(getApplicationContext(),"Click on any of the filter options above.",Toast.LENGTH_SHORT).show();
             } catch (IOException e) {
                 e.printStackTrace();
             }
-
         }
-        }
-
-
-
-    private  static class LUTApplyTask extends AsyncTask<Bitmap, Void, ArrayList<FilterModel>[]>
+    }
+    private  static class LUTApplyTask extends AsyncTask<Void, Void, Void>
     {
         private WeakReference<MainActivity> activityWeakReference;
-        Bitmap originalBitmap;
-        ArrayList<FilterModel> colorfilter=new ArrayList<>();
-        ArrayList<FilterModel> random_filterList=new ArrayList<>();
-        ArrayList<FilterModel> type_filterList=new ArrayList<>();
-
 
         public LUTApplyTask(MainActivity mainActivity) {
-           activityWeakReference=new WeakReference<MainActivity>(mainActivity);
+            activityWeakReference=new WeakReference<MainActivity>(mainActivity);
         }
 
         @Override
@@ -257,20 +242,14 @@ public class MainActivity extends AppCompatActivity implements CategoryAdapter.O
         }
 
         @Override
-        protected ArrayList<FilterModel>[] doInBackground(Bitmap... bitmaps) {
-            originalBitmap=bitmaps[0];
-            ArrayList <FilterModel> [] modal= new ArrayList[3];
+        protected Void doInBackground(Void... voids) {
             fillList();
-            modal[0]=colorfilter;
-            modal[1]=random_filterList;
-            modal[2]=type_filterList;
-
-            return modal;
+            return null;
         }
 
         @Override
-        protected void onPostExecute(ArrayList<FilterModel>[] bitmaps) {
-            super.onPostExecute(bitmaps);
+        protected void onPostExecute(Void aVoid) {
+            super.onPostExecute(aVoid);
             MainActivity mainActivity=activityWeakReference.get();
             if(mainActivity==null || mainActivity.isFinishing())
             {
@@ -279,108 +258,107 @@ public class MainActivity extends AppCompatActivity implements CategoryAdapter.O
 
             mainActivity.progressBar.setVisibility(View.INVISIBLE);
             mainActivity.originalImage.setVisibility(View.VISIBLE);
-            mainActivity.getAsyncTaskResult(bitmaps);
-
         }
+
         private void fillList() {
             MainActivity mainActivity=activityWeakReference.get();
             if(mainActivity==null || mainActivity.isFinishing())
             {
                 return;
             }
-            colorfilter.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.mono_1)),
+            mainActivity.colorfilter.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.mono_1)),
                     "Mono_1"));
-            colorfilter.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.mono_2)),
+            mainActivity.colorfilter.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.mono_2)),
                     "Mono_2"));
-            colorfilter.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.mono_3)),
+            mainActivity.colorfilter.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.mono_3)),
                     "Mono_3"));
-            colorfilter.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.orange_bl_2)),
+            mainActivity.colorfilter.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.orange_bl_2)),
                     "OB_2"));
-            colorfilter.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.orange_bl_3)),
+            mainActivity.colorfilter.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.orange_bl_3)),
                     "OB_3"));
-            colorfilter.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.orange_neob2)),
+            mainActivity.colorfilter.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.orange_neob2)),
                     "OBN_2"));
-            colorfilter.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.orange_bl_3)),
+            mainActivity.colorfilter.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.orange_bl_3)),
                     "OBN_3"));
-            colorfilter.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.mono_gr_1)),
+            mainActivity.colorfilter.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.mono_gr_1)),
                     "MGreen_1"));
-            colorfilter.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.mono_gr_2)),
+            mainActivity.colorfilter.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.mono_gr_2)),
                     "MGreen_2"));
-            colorfilter.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.mono_gr_3)),
+            mainActivity.colorfilter.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.mono_gr_3)),
                     "MGreen_3"));
 
-            random_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_1)),
+            mainActivity.random_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_1)),
                     "Filmic_1"));
-            random_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_2)),
+            mainActivity.random_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_2)),
                     "Filmic_2"));
-            random_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_3)),
+            mainActivity.random_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_3)),
                     "Filmic_3"));
-            random_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_4)),
+            mainActivity.random_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_4)),
                     "Filmic_4"));
-            random_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_5)),
+            mainActivity.random_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_5)),
                     "Filmic_5"));
-            random_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_6)),
+            mainActivity.random_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_6)),
                     "Filmic_6"));
-            random_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_7)),
+            mainActivity.random_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_7)),
                     "Filmic_7"));
-            random_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_8)),
+            mainActivity.random_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_8)),
                     "Filmic_8"));
-            random_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_9)),
+            mainActivity.random_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_9)),
                     "Filmic_9"));
-            random_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_10)),
+            mainActivity.random_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.filmic_10)),
                     "Filmic_10"));
-            type_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.simple_2)),
+            mainActivity.type_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.simple_2)),
                     "Simple_2"));
-            type_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.simple_3)),
+            mainActivity.type_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.simple_3)),
                     "Simple_3"));
-            type_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.spectrum_1)),
+            mainActivity.type_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.spectrum_1)),
                     "Spectrum_1"));
-            type_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.spectrum_2)),
+            mainActivity.type_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.spectrum_2)),
                     "Spectrum_2"));
-            type_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.spectrum_3)),
+            mainActivity.type_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.spectrum_3)),
                     "Spectrum_3"));
-            type_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.virtual_01)),
+            mainActivity.type_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.virtual_01)),
                     "Virtual_1"));
-            type_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.virtual_02)),
+            mainActivity.type_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.virtual_02)),
                     "Virtual_2"));
-            type_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.virtual_03)),
+            mainActivity.type_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.virtual_03)),
                     "Virtual_3"));
-            type_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.web_01)),
+            mainActivity.type_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.web_01)),
                     "Web_1"));
-            type_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.web_02)),
+            mainActivity.type_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.web_02)),
                     "Web_2"));
-            type_filterList.add(new
-                    FilterModel(applUT(originalBitmap,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.web_03)),
+            mainActivity.type_filterList.add(new
+                    FilterModel(applUT(mainActivity.resizedOriginalImage,BitmapFactory.decodeResource(mainActivity.getResources(), R.drawable.web_03)),
                     "Web_3"));
 
         }
@@ -427,7 +405,7 @@ public class MainActivity extends AppCompatActivity implements CategoryAdapter.O
         Log.e("Datam",data);
         categoriesPassData=data;
         Log.e("New Data",categoriesPassData);
-        if(originalBitmap==null)
+        if(resizedOriginalImage==null)
         {
             Toast.makeText(this, "Please select picture !! ", Toast.LENGTH_SHORT).show();
             return;
@@ -489,13 +467,13 @@ public class MainActivity extends AppCompatActivity implements CategoryAdapter.O
                 });
 
                 break;
-                default:
-                    break;
+            default:
+                break;
         }
     }
 
     private void saveFilterImageGalery(int position) {
-            save_pos=position;
+        save_pos=position;
     }
 
 }
