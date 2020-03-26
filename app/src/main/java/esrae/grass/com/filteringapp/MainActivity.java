@@ -123,7 +123,8 @@ public class MainActivity extends AppCompatActivity implements CategoryAdapter.O
                     case "Random" :
                         saveFilterImageGalery(save_pos);
                         MediaStore.Images.Media.insertImage(getContentResolver(),random_filterList.get(save_pos).getBitmap(),"filteredImage", "changefiltered");
-                        Toast.makeText(MainActivity.this, "Save your galery", Toast.LENGTH_SHORT).show();
+                        Toast.
+                                makeText(MainActivity.this, "Save your galery", Toast.LENGTH_SHORT).show();
                         break;
                     case "Type" :
                         saveFilterImageGalery(save_pos);
